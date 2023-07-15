@@ -6,7 +6,7 @@ const {
   updateCart,
 } = require("../controller/CartController");
 
-console.log("try to push");
+console.log("try");
 
 const router = express.Router();
 //  /brands is already added in base path
