@@ -8,6 +8,7 @@ const brandsRouter = require("./route/BrandsRoute");
 const userRouter = require("./route/UserRoute");
 const authRouter = require("./route/AuthRoute");
 const cartRouter = require("./route/CartRoute");
+const orderRouter = require("./route/OrderRoute");
 
 // for coonect front-end to backend cors modual is neccessury
 server.use(
@@ -22,6 +23,7 @@ server.use("/brands", brandsRouter.router);
 server.use("/users", userRouter.router);
 server.use("/auth", authRouter.router);
 server.use("/cart", cartRouter.router);
+server.use("/orders", orderRouter.router);
 
 main().catch((err) => console.log(err));
 
