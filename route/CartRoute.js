@@ -15,5 +15,5 @@ router
   .get("/", fetchCartByUser)
   .delete("/:id", deleteFromCart)
   .patch("/:id", updateCart);
-
+console.log("hellow");
 exports.router = router;
