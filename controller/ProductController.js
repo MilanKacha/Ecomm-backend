@@ -16,8 +16,16 @@ exports.fetchAllProduct = async (req, res) => {
   // filter = {"category":["smartphone","laptops"]}
   // sort = {_sort:"price",_order="desc"}
 
-  let query = Product.find({});
-  let totalProductsQuery = Product.find({});
+  // front end mathi query aave fetchallproductfilter mathi (productApi)
+  // jo admin hoy to deleted product batave nakar user hoy to no batave
+  let condition = {};
+  if (!req.query.admin) {
+    condition.deleted = { $ne: true };
+  }
+
+  let query = Product.find(condition);
+  //aevi product ke je detete thaei na hoy mongodb ni query
+  let totalProductsQuery = Product.find(condition);
 
   if (req.query.category) {
     query = query.find({ category: req.query.category });
