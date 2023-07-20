@@ -22,8 +22,15 @@ exports.createUser = async (req, res) => {
           if (err) {
             res.status(400).json(err);
           } else {
-            const token = jwt.sign(sanitizeUser(doc), SECRET_KEY);
-            res.status(201).json(token);
+            const token = jwt.sign(sanitizeUser(doc), "SECRET_KEY");
+            res
+              .cookie("jwt", token, {
+                expires: new Date(Date.now() + 3600000),
+                httpOnly: true,
+              })
+              .status(201)
+              .json(token);
+            // .json({ id: doc.id, role: doc.role });
           }
         });
       }
@@ -68,7 +75,6 @@ exports.checkUser = async (req, res) => {
 //   //   res.status(400).json(err);
 //   // }
 // };
-
 exports.checkUser = async (req, res) => {
-  res.json(req.user);
+  res.json({ status: "success", user: req.user });
 };

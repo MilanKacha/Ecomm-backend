@@ -52,12 +52,16 @@ server.use("/orders", isAuth(), orderRouter.router);
 // Passport Strategies
 passport.use(
   "local",
-  new LocalStrategy(async function (username, password, done) {
+  new LocalStrategy({ usernameField: "email" }, async function (
+    email,
+    password,
+    done
+  ) {
     // by default passport uses username
+    // console.log({ email, password });
     try {
-      const user = await User.findOne({ username });
-      // console.log(user);
-      // console.log(username, password, user);
+      const user = await User.findOne({ email: email });
+      // console.log(email, password, user);
       if (!user) {
         return done(null, false, { message: "invalid credentials" }); // for safety
       }
@@ -71,24 +75,71 @@ passport.use(
           if (!crypto.timingSafeEqual(user.password, hashedPassword)) {
             return done(null, false, { message: "invalid credentials" });
           }
-          const token = jwt.sign(sanitizeUser(user), SECRET_KEY);
-          done(null, token); // this lines sends to serializer
+          const token = jwt.sign(sanitizeUser(user), "SECRET_KEY");
+          done(null, { id: user.id, role: user.role, token }); // this lines sends to serializer
         }
       );
     } catch (err) {
       done(err);
-      console.log(err);
     }
   })
 );
 
+// passport.use(
+//   "local",
+//   new LocalStrategy(async function (username, password, done) {
+//     // by default passport uses username
+//     try {
+//       const user = await User.findOne({ username });
+//       // console.log(user);
+//       // console.log(username, password, user);
+//       if (!user) {
+//         return done(null, false, { message: "invalid credentials" }); // for safety
+//       }
+//       crypto.pbkdf2(
+//         password,
+//         user.salt,
+//         310000,
+//         32,
+//         "sha256",
+//         async function (err, hashedPassword) {
+//           if (!crypto.timingSafeEqual(user.password, hashedPassword)) {
+//             return done(null, false, { message: "invalid credentials" });
+//           }
+//           const token = jwt.sign(sanitizeUser(user), SECRET_KEY);
+//           done(null, token); // this lines sends to serializer
+//         }
+//       );
+//     } catch (err) {
+//       done(err);
+//       console.log(err);
+//     }
+//   })
+// );
+
+// passport.use(
+//   "jwt",
+//   new JwtStrategy(opts, async function (jwt_payload, done) {
+//     console.log({ jwt_payload });
+//     try {
+//       const user = await User.findById({ id: jwt_payload.sub });
+//       console.log(user);
+//       if (user) {
+//         return done(null, sanitizeUser(user)); // this calls serializer
+//       } else {
+//         return done(null, false);
+//       }
+//     } catch (err) {
+//       return done(err, false);
+//     }
+//   })
+// );
+
 passport.use(
   "jwt",
   new JwtStrategy(opts, async function (jwt_payload, done) {
-    console.log({ jwt_payload });
     try {
-      const user = await User.findOne({ id: jwt_payload.sub });
-      console.log(user);
+      const user = await User.findById(jwt_payload.id);
       if (user) {
         return done(null, sanitizeUser(user)); // this calls serializer
       } else {
@@ -99,8 +150,15 @@ passport.use(
     }
   })
 );
+
 // this creates session variable req.user on being called from callbacks
 // passport.js na doc mathi authentication mathi
+// passport.serializeUser(function (user, cb) {
+//   console.log("serialize", user);
+//   process.nextTick(function () {
+//     return cb(null, { id: user.id, role: user.role });
+//   });
+// });
 passport.serializeUser(function (user, cb) {
   console.log("serialize", user);
   process.nextTick(function () {
@@ -108,6 +166,7 @@ passport.serializeUser(function (user, cb) {
   });
 });
 // this changes session variable req.user when called from authorized request
+
 passport.deserializeUser(function (user, cb) {
   console.log("de-serialize", user);
   process.nextTick(function () {
