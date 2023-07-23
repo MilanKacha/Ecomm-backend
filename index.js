@@ -9,6 +9,7 @@ const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
+const cookieParser = require("cookie-parser");
 const productsRouters = require("./route/ProductsRoute");
 const categoriesRouter = require("./route/CategoryRoute");
 const brandsRouter = require("./route/BrandsRoute");
@@ -17,14 +18,17 @@ const authRouter = require("./route/AuthRoute");
 const cartRouter = require("./route/CartRoute");
 const orderRouter = require("./route/OrderRoute");
 const { User } = require("./modal/UserModal");
-const { isAuth, sanitizeUser } = require("./services/common");
+const { isAuth, sanitizeUser, cookieExtractor } = require("./services/common");
 
 const SECRET_KEY = "SECRET_KEY";
 // JWT options
 const opts = {};
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = SECRET_KEY; // TODO: should not be in code;
 
+// client thi je cookie aave te vache
+// server.use(express.static("build"));/
+server.use(cookieParser());
 server.use(
   session({
     secret: "keyboard cat",
@@ -36,10 +40,13 @@ server.use(passport.authenticate("session"));
 server.use(passport.initialize());
 server.use(
   cors({
+    origin: true,
+    credentials: true,
     exposedHeaders: ["X-Total-Count"],
   })
 );
 server.use(express.json()); //to parse req.body
+// server.use(cors({ origin: "your_frontend_url", credentials: true }));
 server.use("/products", isAuth(), productsRouters.router);
 // we can also use JWT token for client-only auth
 server.use("/categories", isAuth(), categoriesRouter.router);
@@ -76,7 +83,8 @@ passport.use(
             return done(null, false, { message: "invalid credentials" });
           }
           const token = jwt.sign(sanitizeUser(user), "SECRET_KEY");
-          done(null, { id: user.id, role: user.role, token }); // this lines sends to serializer
+
+          done(null, { token }); // this lines sends to serializer
         }
       );
     } catch (err) {
@@ -84,56 +92,6 @@ passport.use(
     }
   })
 );
-
-// passport.use(
-//   "local",
-//   new LocalStrategy(async function (username, password, done) {
-//     // by default passport uses username
-//     try {
-//       const user = await User.findOne({ username });
-//       // console.log(user);
-//       // console.log(username, password, user);
-//       if (!user) {
-//         return done(null, false, { message: "invalid credentials" }); // for safety
-//       }
-//       crypto.pbkdf2(
-//         password,
-//         user.salt,
-//         310000,
-//         32,
-//         "sha256",
-//         async function (err, hashedPassword) {
-//           if (!crypto.timingSafeEqual(user.password, hashedPassword)) {
-//             return done(null, false, { message: "invalid credentials" });
-//           }
-//           const token = jwt.sign(sanitizeUser(user), SECRET_KEY);
-//           done(null, token); // this lines sends to serializer
-//         }
-//       );
-//     } catch (err) {
-//       done(err);
-//       console.log(err);
-//     }
-//   })
-// );
-
-// passport.use(
-//   "jwt",
-//   new JwtStrategy(opts, async function (jwt_payload, done) {
-//     console.log({ jwt_payload });
-//     try {
-//       const user = await User.findById({ id: jwt_payload.sub });
-//       console.log(user);
-//       if (user) {
-//         return done(null, sanitizeUser(user)); // this calls serializer
-//       } else {
-//         return done(null, false);
-//       }
-//     } catch (err) {
-//       return done(err, false);
-//     }
-//   })
-// );
 
 passport.use(
   "jwt",
@@ -182,9 +140,9 @@ async function main() {
   console.log("DB connected successfully");
 }
 
-server.get("/", (req, res) => {
-  res.json({ status: "success" });
-});
+// server.get("/", (req, res) => {
+//   res.json({ status: "success" });
+// });
 
 server.listen(8080, () => {
   console.log("server started");

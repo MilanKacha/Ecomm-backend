@@ -11,6 +11,6 @@ const router = express.Router();
 router
   .post("/signup", createUser)
   .post("/login", passport.authenticate("local"), logInUser)
-  .get("/check", passport.authenticate("jwt"), checkUser);
+  .get("/check", passport.authenticate("jwt", { session: false }), checkUser);
 
 exports.router = router;

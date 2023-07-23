@@ -2,8 +2,12 @@ const { User } = require("../modal/UserModal");
 
 exports.fetchUserById = async (req, res) => {
   // jayare user ni detatils male tyare khali name email & id j male password no male
+  // pela params mathi aavto pan have
+  const { id } = req.user;
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(id);
+    delete user.password;
+    delete user.salt;
     res.status(200).json({
       id: user.id,
       addresses: user.addresses,

@@ -1,9 +1,12 @@
 const { Cart } = require("../modal/CartModal");
 
 exports.fetchCartByUser = async (req, res) => {
-  const { user } = req.query;
+  // passportjs ane token generet notu karyu tyare
+  // const { user } = req.query;
+  // have frontend mathi query delete kari nakhi
+  const { user } = req.user;
   try {
-    const brands = await Cart.find({ user: user })
+    const brands = await Cart.find({ user: user.id })
       .populate("user")
       .populate("product")
       .exec();
@@ -14,7 +17,9 @@ exports.fetchCartByUser = async (req, res) => {
 };
 
 exports.addToCart = async (req, res) => {
-  const cart = new Cart(req.body);
+  const { id } = req.user;
+  // have user ni id levani req.body mathi token mathi aave
+  const cart = new Cart({ ...req.body, user: id });
   try {
     const doc = await cart.save();
     const result = await doc.populate("product");
