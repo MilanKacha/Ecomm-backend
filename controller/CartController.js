@@ -4,21 +4,19 @@ exports.fetchCartByUser = async (req, res) => {
   // passportjs ane token generet notu karyu tyare
   // const { user } = req.query;
   // have frontend mathi query delete kari nakhi
-  const { user } = req.user;
+  const { id } = req.user;
   try {
-    const brands = await Cart.find({ user: user.id })
-      .populate("user")
-      .populate("product")
-      .exec();
-    res.status(200).json(brands);
-  } catch (error) {
+    const cartItems = await Cart.find({ user: id }).populate("product");
+
+    res.status(200).json(cartItems);
+  } catch (err) {
     res.status(400).json(err);
   }
 };
 
 exports.addToCart = async (req, res) => {
-  const { id } = req.user;
   // have user ni id levani req.body mathi token mathi aave
+  const { id } = req.user;
   const cart = new Cart({ ...req.body, user: id });
   try {
     const doc = await cart.save();

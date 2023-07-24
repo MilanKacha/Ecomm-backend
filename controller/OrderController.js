@@ -1,11 +1,12 @@
 const { Order } = require("./../modal/OrderModal");
 
 exports.fetchOrderByUser = async (req, res) => {
-  const { user } = req.query;
+  const { id } = req.user;
   try {
-    const orders = await Order.find({ user: user });
+    const orders = await Order.find({ user: id });
+
     res.status(200).json(orders);
-  } catch (error) {
+  } catch (err) {
     res.status(400).json(err);
   }
 };

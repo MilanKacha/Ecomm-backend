@@ -17,6 +17,7 @@ const userRouter = require("./route/UserRoute");
 const authRouter = require("./route/AuthRoute");
 const cartRouter = require("./route/CartRoute");
 const orderRouter = require("./route/OrderRoute");
+const path = require("path");
 const { User } = require("./modal/UserModal");
 const { isAuth, sanitizeUser, cookieExtractor } = require("./services/common");
 
@@ -27,7 +28,7 @@ opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = SECRET_KEY; // TODO: should not be in code;
 
 // client thi je cookie aave te vache
-// server.use(express.static("build"));/
+server.use(express.static(path.join(__dirname, "./build")));
 server.use(cookieParser());
 server.use(
   session({
