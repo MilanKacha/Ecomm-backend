@@ -3,7 +3,8 @@ const passport = require("passport");
 const {
   createUser,
   logInUser,
-  checkUser,
+  checkAuth,
+  logout,
 } = require("../controller/AuthController");
 
 const router = express.Router();
@@ -11,6 +12,7 @@ const router = express.Router();
 router
   .post("/signup", createUser)
   .post("/login", passport.authenticate("local"), logInUser)
-  .get("/check", passport.authenticate("jwt", { session: false }), checkUser);
+  .get("/check", passport.authenticate("jwt", { session: false }), checkAuth)
+  .get("/logout", logout);
 
 exports.router = router;

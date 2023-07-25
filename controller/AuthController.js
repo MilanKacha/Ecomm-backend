@@ -41,20 +41,32 @@ exports.createUser = async (req, res) => {
 };
 
 exports.logInUser = async (req, res) => {
+  const user = req.user;
   res
-    .cookie("jwt", req.user.token, {
+    .cookie("jwt", user.token, {
       expires: new Date(Date.now() + 3600000),
-      httpOnly: false,
-      secure: true,
+      httpOnly: true,
     })
     .status(201)
-    // .json(token);
-    .json(req.user.token);
-  // res.json(req.user);
+    .json({ id: user.id, role: user.role });
 };
 
-exports.checkUser = async (req, res) => {
-  res.json({ status: "success", user: req.user });
+// login thaya pa6i req.user available 6e ke nahi te jose
+exports.checkAuth = async (req, res) => {
+  if (req.user) {
+    res.json(req.user);
+  } else {
+    res.sendStatus(401);
+  }
+};
+
+exports.logout = async (req, res) => {
+  res
+    .cookie("jwt", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .sendStatus(200);
 };
 
 // exports.logInUser = async (req, res) => {

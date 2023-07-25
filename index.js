@@ -37,7 +37,6 @@ server.use(
     saveUninitialized: false, // don't create session until something stored
   })
 );
-server.use(passport.authenticate("session"));
 server.use(passport.initialize());
 server.use(
   cors({
@@ -47,15 +46,22 @@ server.use(
   })
 );
 server.use(express.json()); //to parse req.body
-// server.use(cors({ origin: "your_frontend_url", credentials: true }));
-server.use("/products", isAuth(), productsRouters.router);
+// remove 304
+server.use((req, res, next) => {
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  next();
+});
+
+// server.use(express.urlencoded({ extended: true }));
+
+server.use("/api/products", isAuth(), productsRouters.router);
 // we can also use JWT token for client-only auth
-server.use("/categories", isAuth(), categoriesRouter.router);
-server.use("/brands", isAuth(), brandsRouter.router);
-server.use("/users", isAuth(), userRouter.router);
-server.use("/auth", authRouter.router);
-server.use("/cart", isAuth(), cartRouter.router);
-server.use("/orders", isAuth(), orderRouter.router);
+server.use("/api/categories", isAuth(), categoriesRouter.router);
+server.use("/api/brands", isAuth(), brandsRouter.router);
+server.use("/api/users", isAuth(), userRouter.router);
+server.use("/api/auth", authRouter.router);
+server.use("/api/cart", isAuth(), cartRouter.router);
+server.use("/api/orders", isAuth(), orderRouter.router);
 
 // Passport Strategies
 passport.use(
@@ -141,9 +147,14 @@ async function main() {
   console.log("DB connected successfully");
 }
 
-// server.get("/", (req, res) => {
-//   res.json({ status: "success" });
-// });
+// jyare reload kari tyare backend no data fetch na thay
+server.get("/*", function (req, res) {
+  res.sendFile(path.resolve(__dirname, "./build/index.html"), function (err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
+});
 
 server.listen(8080, () => {
   console.log("server started");
